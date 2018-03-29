@@ -32,7 +32,7 @@ public class NewsService {
 	}
 	
 	public News findNews(int id) {
-		return newsRepository.findOne(id);
+		return newsRepository.findById(id).get();
 	}
 	
 	public void save(News news) {
@@ -40,6 +40,6 @@ public class NewsService {
 	}
 	
 	public void delete (int id) {
-		newsRepository.delete(id);
+		newsRepository.deleteById(id);
 	}
 }

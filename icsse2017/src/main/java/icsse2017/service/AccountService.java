@@ -32,7 +32,7 @@ public class AccountService {
 	}
 	
 	public Account findAccount(int id) {
-		return accountRepository.findOne(id);
+		return accountRepository.findById(id).get();
 	}
 	
 	public void save(Account account) {
@@ -40,7 +40,7 @@ public class AccountService {
 	}
 	
 	public void delete (int id) {
-		accountRepository.delete(id);
+		accountRepository.deleteById(id);
 	}
 	
 	public Account CheckLogin (@RequestParam String username,@RequestParam String password) {
