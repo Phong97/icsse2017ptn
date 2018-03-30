@@ -20,7 +20,7 @@ public class HomeController {
 	@Autowired
 	private AccountService accountService;
 	
-	@GetMapping("/home")
+	@GetMapping({"/home","/"})
 	public String Home(HttpServletRequest request) {
 		request.setAttribute("newss", newsService.findAll());
 		return "home";
