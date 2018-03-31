@@ -157,7 +157,7 @@
 					<div>${news.content}</div>
 					<div>
 					<a href="${news.link}" target="_blank"><span>Link
-							Documment:</span></a>
+							Documment</span></a>
 					</div>
 				</div>
 		
