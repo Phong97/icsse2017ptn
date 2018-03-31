@@ -1,5 +1,7 @@
 package icsse2017.controller;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +10,11 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
+import icsse2017.dao.uploaddrive;
 
 import icsse2017.service.NewsService;
 import icsse2017.model.News;
@@ -58,7 +64,7 @@ public class NewsController {
 	@GetMapping("/update-news")
 	public String updateNews(@RequestParam int id, HttpServletRequest request) {
 		request.setAttribute("announce", "");
-		request.setAttribute("news", newsService.findNews(id));
+		request.setAttribute("news", newsService.findNewsById(id));
 		request.setAttribute("accounts", accountService.findAll());
 		request.setAttribute("mode", "UPDATE");
 		return PATH;
@@ -66,7 +72,7 @@ public class NewsController {
 	
 	@PostMapping("save-news")
 	public String saveNews(@ModelAttribute News news, BindingResult bindingResult,
-			HttpServletRequest request) {
+			HttpServletRequest request, @RequestAttribute("file") MultipartFile[] file) {
 
 		String announce = null;		
 		if(news.getId()==0)
@@ -76,6 +82,14 @@ public class NewsController {
 		
 		try {
 			request.setCharacterEncoding("UTF-8");
+			newsService.save(news);
+			news = newsService.findNewsByTitle(news.getTitle());
+			uploaddrive uploaddrive=new uploaddrive();
+			List<String> linktep=uploaddrive.doUpload(request,file,news.getId());
+			for (String link:linktep) {
+		            news.setLink(link);
+		            break;
+		        }
 			newsService.save(news);
 				request.setAttribute("announce", "You "+ announce +" successfully");
 		} catch (Exception e) {

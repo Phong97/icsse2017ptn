@@ -52,7 +52,7 @@ public class HomeController {
 	
 	@GetMapping("/news")
 	public String News(@RequestParam int id, HttpServletRequest request) {
-		request.setAttribute("news", newsService.findNews(id));
+		request.setAttribute("news", newsService.findNewsById(id));
 		request.setAttribute("newss", newsService.findAll());
 		return "news";
 	}

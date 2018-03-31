@@ -31,8 +31,19 @@ public class NewsService {
 		return newss;
 	}
 	
-	public News findNews(int id) {
+	public News findNewsById(int id) {
 		return newsRepository.findById(id).get();
+	}
+	
+	public News findNewsByTitle(String title) {
+		News newss = new News();
+		for(News news:newsRepository.findAll()) {
+			if (news.getTitle().equals(title)) {
+				newss = news;
+			}
+		}
+		
+		return newss;
 	}
 	
 	public void save(News news) {

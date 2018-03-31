@@ -13,16 +13,26 @@ public class News {
 	private String title;
 	private String content;
 	private String date;
+	private String link;
 	private String username;
+	
+	public String getLink() {
+		return link;
+	}
+
+	public void setLink(String link) {
+		this.link = link;
+	}
 	
 	public News() {}
 	
-	public News(int id, String title, String content, String date, String username) {
+	public News(int id, String title, String content, String date, String link ,String username) {
 		super();
 		this.id = id;
 		this.title = title;
 		this.content = content;
 		this.date = date;
+		this.link = link;
 		this.username = username;
 	}
 
