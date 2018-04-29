@@ -1,6 +1,6 @@
 package icsse2017.controller;
 
-import java.util.List;
+import java.io.InputStream;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -14,7 +14,15 @@ import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import icsse2017.dao.uploaddrive;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
 
 import icsse2017.service.NewsService;
 import icsse2017.model.News;
@@ -72,9 +80,10 @@ public class NewsController {
 	
 	@PostMapping("save-news")
 	public String saveNews(@ModelAttribute News news, BindingResult bindingResult,
-			HttpServletRequest request, @RequestAttribute("file") MultipartFile[] file) {
+			HttpServletRequest request, @RequestAttribute("file") MultipartFile file) {
 
-		String announce = null;		
+		String announce = null;	
+		String link="";
 		if(news.getId()==0)
 		{
 			announce = "add new news";
@@ -84,12 +93,40 @@ public class NewsController {
 			request.setCharacterEncoding("UTF-8");
 			newsService.save(news);
 			news = newsService.findNewsByTitle(news.getTitle());
-			uploaddrive uploaddrive=new uploaddrive();
-			List<String> linktep=uploaddrive.doUpload(request,file,news.getId());
-			for (String link:linktep) {
-		            news.setLink(link);
-		            break;
-		        }
+			//check the file
+			
+			if (file.isEmpty()) {
+	            System.out.println( "Please select a file to upload");
+	            return null;
+	        }
+			
+			//(access key , sceret key)
+			BasicAWSCredentials creds = new BasicAWSCredentials("AKIAI7EUCEFBT652QYLA", "/JA6JdeuBu2g51KRXEacjbvR6sUw8TlwlvhApV9K"); 
+			
+			AmazonS3 s3client = AmazonS3Client.builder()
+				    .withRegion("ap-southeast-1")
+				    .withCredentials(new AWSStaticCredentialsProvider(creds))
+				    .build();
+			
+			String bucketName = "bucketdemouploadfile";
+			try{
+
+				InputStream is = file.getInputStream();
+				
+				//save on s3 with public read access
+				s3client.putObject(new PutObjectRequest(bucketName, file.getOriginalFilename(), is ,new ObjectMetadata()).withCannedAcl(CannedAccessControlList.PublicRead));
+				
+				//get a object
+				S3Object s3object = s3client.getObject(new GetObjectRequest(bucketName, file.getOriginalFilename()));		
+				
+				//add to model
+			 link = s3object.getObjectContent().getHttpRequest().getURI().toString();
+				
+			}catch (Exception e) {
+				// TODO: handle exception
+				e.printStackTrace();
+			}
+			news.setLink(link);
 			newsService.save(news);
 				request.setAttribute("announce", "You "+ announce +" successfully");
 		} catch (Exception e) {
